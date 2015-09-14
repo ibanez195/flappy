@@ -18,15 +18,40 @@ int main()
 
 	init_ncurses();
 
+	// player variables
 	double player_y = 10.0;
 	double player_dy = 0;
 
+	// initialize wall array
+	int wallnum = COLS/20;
+	wall* walls = malloc(wallnum*sizeof(wall));
+	for(int i=0; i < wallnum; i++)
+	{
+		walls[i] = (wall){20*i, (rand()%LINES) + 1};
+	}
+
+	
+
+	int wallcounter = 0;
 	while(true)
 	{
 		//clear previous player position
 		attron(COLOR_PAIR(2));
-		mvaddch(round(player_y), COLS/2, ' ');
+		mvaddch(round(player_y), COLS/4, ' ');
 		attroff(COLOR_PAIR(2));
+
+		//clear previous wall positions and move position
+		for(int i=0; i < wallnum; i++)
+		{
+			attron(COLOR_PAIR(2));
+			for(int r=0; r < LINES; r++)
+			{
+				mvaddch(r, walls[i].xpos, ' ');
+			}
+			attroff(COLOR_PAIR(2));
+
+			walls[i].xpos--;
+		}
 
 		// if space has been pressed
 		if(getch() == ' ')
@@ -37,13 +62,39 @@ int main()
 		player_y += player_dy;
 		player_dy += gravity;
 
+		wallcounter++;
+		if(wallcounter == 90)
+		{
+			for (int i = 0; i < wallnum; i++)
+			{
+				walls[i].xpos--;
+			}
+			wallcounter = 0;
+		}
+
+		//draw new wall positions
+		for(int i=0; i < wallnum; i++)
+		{
+			attron(COLOR_PAIR(1));
+			for(int r=0; r < LINES; r++)
+			{
+				if(abs(walls[i].holepos - r) > 3)
+				{
+					mvaddch(r, walls[i].xpos, ' ');
+				}
+			}
+			attroff(COLOR_PAIR(1));
+		}
+		
+		
 
 		//draw new player position
 		attron(COLOR_PAIR(1));
-		mvaddch(round(player_y), COLS/2, ' ');
+		mvaddch(round(player_y), COLS/4, ' ');
 		attroff(COLOR_PAIR(1));
 
 		refresh();
+		getch();
 		usleep(60*1000);
 	}
 
