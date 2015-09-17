@@ -15,7 +15,7 @@ void init_ncurses();
 int main()
 {
 	int score = 0;
-	double gravity = 0.1;
+	double gravity = 0.15;
 	bool lost = false;
 
 	init_ncurses();
@@ -32,6 +32,9 @@ int main()
 	{
 		walls[i] = (wall){(COLS/4)+(20*i)+50, (rand()%(LINES-12)) + 6};
 	}
+
+	// draw screen black
+	bkgd(COLOR_PAIR(2));
 
 	
 
@@ -60,7 +63,7 @@ int main()
 		// jump if space has been pressed
 		if(getch() == ' ')
 		{
-			player_dy = -0.95;
+			player_dy = -1;
 		}
 
 		// handle player gravity
@@ -124,6 +127,12 @@ int main()
 			}else if(abs(walls[i].xpos - player_x) <= 1){
 				score++;
 			}
+		}
+
+		// detect player offscreen
+		if(player_y > LINES+2)
+		{
+			lost = true;
 		}
 
 		// score has 6 points add for every wall so divide to display correctly
